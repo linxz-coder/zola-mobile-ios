@@ -1,14 +1,6 @@
-//
-//  ViewController.swift
-//  Zola-Mobile
-//
-//  Created by linxiaozhong on 2024/11/19.
-//
-
-// ViewController.swift
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     private let filenameTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Enter filename (without .md)"
@@ -32,66 +24,28 @@ class ViewController: UIViewController {
         return button
     }()
     
-    private var longPressGesture: UILongPressGestureRecognizer?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         insertFrontMatter()
         setupKeyboardHandling()
-        setupLongPressGesture()
         
+        // Add double tap gesture
+        let doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
+        doubleTapGesture.numberOfTapsRequired = 2
+        view.addGestureRecognizer(doubleTapGesture)
         
-        // Add tap gesture to dismiss keyboard
-       let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-       view.addGestureRecognizer(tapGesture)
-       
-       filenameTextField.delegate = self
-       textView.delegate = self
+        filenameTextField.delegate = self
+        textView.delegate = self
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        longPress.minimumPressDuration = 1.0
+        textView.addGestureRecognizer(longPress)
     }
     
-    private func setupLongPressGesture() {
-       longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-       longPressGesture?.minimumPressDuration = 1.0 // 1秒长按
-       textView.addGestureRecognizer(longPressGesture!)
-   }
-    
-    @objc private func handleLongPress(gesture: UILongPressGestureRecognizer) {
-        if gesture.state == .began {
-            textView.resignFirstResponder()
-        }
-    }
-    
-
-    
-    private func setupKeyboardHandling() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow),
-            name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide),
-            name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    @objc private func keyboardWillShow(notification: NSNotification) {
-        guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
-            as? NSValue)?.cgRectValue else { return }
-            
-        let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height, right: 0)
-        textView.contentInset = contentInsets
-        textView.scrollIndicatorInsets = contentInsets
-    }
-    
-    @objc private func keyboardWillHide(notification: NSNotification) {
-        textView.contentInset = .zero
-        textView.scrollIndicatorInsets = .zero
-    }
-    
-    @objc private func dismissKeyboard() {
+    @objc private func handleDoubleTap() {
         view.endEditing(true)
     }
-}
-
-extension ViewController: UITextViewDelegate {
-    
     
     private func setupUI() {
         view.backgroundColor = .white
@@ -119,19 +73,49 @@ extension ViewController: UITextViewDelegate {
         uploadButton.addTarget(self, action: #selector(uploadButtonTapped), for: .touchUpInside)
     }
     
+    private func setupKeyboardHandling() {
+        NotificationCenter.default.addObserver(self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil)
+        NotificationCenter.default.addObserver(self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil)
+    }
+    
     private func insertFrontMatter() {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let today = dateFormatter.string(from: Date())
         
-        let frontMatter = """
+        textView.text = """
         +++
         title = ""
         date = \(today)
         +++
         
         """
-        textView.text = frontMatter
+    }
+    
+    @objc private func handleLongPress(gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            textView.resignFirstResponder()
+        }
+    }
+    
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
+            as? NSValue)?.cgRectValue else { return }
+        
+        let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height, right: 0)
+        textView.contentInset = contentInsets
+        textView.scrollIndicatorInsets = contentInsets
+    }
+    
+    @objc private func keyboardWillHide(notification: NSNotification) {
+        textView.contentInset = .zero
+        textView.scrollIndicatorInsets = .zero
     }
     
     @objc private func uploadButtonTapped() {
@@ -154,9 +138,7 @@ extension ViewController: UITextViewDelegate {
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
-}
-
-extension ViewController: UITextFieldDelegate {
+    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let updatedText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? string
         uploadButton.isEnabled = !updatedText.isEmpty
