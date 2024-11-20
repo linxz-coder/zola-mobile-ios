@@ -13,6 +13,16 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         return tf
     }()
     
+    // 添加作者输入框
+    private let authorTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Enter author name (optional)"
+        tf.borderStyle = .roundedRect
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.heightAnchor.constraint(equalToConstant: 36).isActive = true // 降低高度
+        return tf
+    }()
+    
     //文本框区域
     private let textView: UITextView = {
         let tv = UITextView()
@@ -69,6 +79,17 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         
         filenameTextField.delegate = self
         textView.delegate = self
+        authorTextField.delegate = self
+        
+        // 添加作者输入框的文本变化监听
+        authorTextField.addTarget(self, action: #selector(authorTextChanged), for: .editingChanged)
+        // 添加作者输入框的输入辅助视图
+        authorTextField.inputAccessoryView = keyboardToolbar
+    }
+    
+    // 添加作者文本变化的处理方法
+    @objc private func authorTextChanged() {
+        insertFrontMatter()
     }
     
     // 设置输入框的inputAccessoryView
@@ -94,23 +115,28 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         view.backgroundColor = .white
         
         view.addSubview(filenameTextField)
+        view.addSubview(authorTextField) // 添加作者输入框
         view.addSubview(textView)
         view.addSubview(uploadButton)
         
         NSLayoutConstraint.activate([
-            filenameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            filenameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            filenameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            filenameTextField.heightAnchor.constraint(equalToConstant: 44),
-            
-            textView.topAnchor.constraint(equalTo: filenameTextField.bottomAnchor, constant: 16),
-            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textView.bottomAnchor.constraint(equalTo: uploadButton.topAnchor, constant: -16),
-            
-            uploadButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            uploadButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            uploadButton.heightAnchor.constraint(equalToConstant: 44)
+              filenameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+              filenameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+              filenameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+              filenameTextField.heightAnchor.constraint(equalToConstant: 36), // 统一高度
+              
+              authorTextField.topAnchor.constraint(equalTo: filenameTextField.bottomAnchor, constant: 4), // 减小间距
+              authorTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+              authorTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+              
+              textView.topAnchor.constraint(equalTo: authorTextField.bottomAnchor, constant: 8), // 减小间距
+              textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+              textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+              textView.bottomAnchor.constraint(equalTo: uploadButton.topAnchor, constant: -16),
+              
+              uploadButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+              uploadButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+              uploadButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
         uploadButton.addTarget(self, action: #selector(uploadButtonTapped), for: .touchUpInside)
@@ -134,13 +160,20 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let today = dateFormatter.string(from: Date())
         
-        textView.text = """
-        +++
-        title = ""
-        date = \(today)
-        +++
+        var frontMatter = """
+            +++
+            title = ""
+            date = \(today)
+            """
         
-        """
+        // 如果有作者，添加作者信息
+       if let author = authorTextField.text, !author.isEmpty {
+           frontMatter += "\nauthors = [\"\(author)\"]"
+       }
+       
+       frontMatter += "\n+++\n\n"
+       
+       textView.text = frontMatter
         
         hasFrontMatterTitle = false  // 初始状态设置为 false
     }
@@ -163,19 +196,112 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
     
     //上传按钮事件
     @objc private func uploadButtonTapped() {
-        guard let filename = filenameTextField.text, !filename.isEmpty else { return }
-        let content = textView.text!
-        GitHubService.shared.uploadContent(content: content, filename: "\(filename).md") { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    self.showAlert(message: "Successfully uploaded!")
-                case .failure(let error):
-                    self.showAlert(message: "Upload failed: \(error.localizedDescription)")
-                }
+           guard let filename = filenameTextField.text, !filename.isEmpty else { return }
+           
+           // 首先显示确认上传的对话框
+           let confirmAlert = UIAlertController(title: "Confirm Upload",
+                                              message: "Do you want to upload this file?",
+                                              preferredStyle: .alert)
+           
+           let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+           
+           let confirmAction = UIAlertAction(title: "Confirm", style: .default) { [weak self] _ in
+               self?.showPathSelectionAlert(filename: filename)
+           }
+           
+           confirmAlert.addAction(cancelAction)
+           confirmAlert.addAction(confirmAction)
+           
+           present(confirmAlert, animated: true)
+       }
+    
+    //用户选择路径
+    private func showPathSelectionAlert(filename: String) {
+           let pathAlert = UIAlertController(title: "Select Upload Path",
+                                           message: "Choose or enter a path (default: content)",
+                                           preferredStyle: .actionSheet)
+           
+           // 预定义的路径选项
+           let paths = ["/content/blog", "/content/shorts", "/content/books"]
+           
+           // 添加预定义路径选项
+           for path in paths {
+               let pathAction = UIAlertAction(title: path, style: .default) { [weak self] _ in
+                   self?.uploadContent(filename: filename, path: path)
+               }
+               pathAlert.addAction(pathAction)
+           }
+           
+           // 添加自定义路径选项
+           let customAction = UIAlertAction(title: "Custom Path", style: .default) { [weak self] _ in
+               self?.showCustomPathInput(filename: filename)
+           }
+           
+           // 添加默认路径选项
+           let defaultAction = UIAlertAction(title: "Default (content)", style: .default) { [weak self] _ in
+               self?.uploadContent(filename: filename, path: "/content")
+           }
+           
+           let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+           
+           pathAlert.addAction(customAction)
+           pathAlert.addAction(defaultAction)
+           pathAlert.addAction(cancelAction)
+           
+           // iPad 支持
+           if let popoverController = pathAlert.popoverPresentationController {
+               popoverController.sourceView = uploadButton
+               popoverController.sourceRect = uploadButton.bounds
+           }
+           
+           present(pathAlert, animated: true)
+       }
+    
+    //自定义路径
+    private func showCustomPathInput(filename: String) {
+            let customPathAlert = UIAlertController(title: "Enter Custom Path",
+                                                  message: "Start with /content/",
+                                                  preferredStyle: .alert)
+            
+            customPathAlert.addTextField { textField in
+                textField.placeholder = "/content/your-path"
+                textField.text = "/content/"
             }
+            
+            let confirmAction = UIAlertAction(title: "Confirm", style: .default) { [weak self] _ in
+                guard let customPath = customPathAlert.textFields?.first?.text,
+                      !customPath.isEmpty else { return }
+                self?.uploadContent(filename: filename, path: customPath)
+            }
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+            
+            customPathAlert.addAction(confirmAction)
+            customPathAlert.addAction(cancelAction)
+            
+            present(customPathAlert, animated: true)
         }
-    }
+    
+    //上传content
+    private func uploadContent(filename: String, path: String) {
+           let content = textView.text!
+           // 移除路径开头的斜杠（如果存在）
+           let cleanPath = path.hasPrefix("/") ? String(path.dropFirst()) : path
+           
+           GitHubService.shared.uploadContent(content: content,
+                                            filename: "\(filename).md",
+                                            path: cleanPath) { [weak self] result in
+               DispatchQueue.main.async {
+                   switch result {
+                   case .success:
+                       self?.showAlert(message: "Successfully uploaded to \(path)!")
+                   case .failure(let error):
+                       self?.showAlert(message: "Upload failed: \(error.localizedDescription)")
+                   }
+               }
+           }
+       }
+    
     
     //upload button的通知事件
     private func showAlert(message: String) {

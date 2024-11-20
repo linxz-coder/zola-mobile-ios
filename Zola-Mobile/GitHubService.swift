@@ -7,7 +7,7 @@ class GitHubService {
     private let owner = "linxz-coder"
     private let repo = "zola-basic"
     private let branch = "main"
-    private let path = "content/blog"
+//    private let path = "content/blog"
     private let token: String
     
     init() {
@@ -18,7 +18,7 @@ class GitHubService {
         self.token = token
     }
     
-    func uploadContent(content: String, filename: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func uploadContent(content: String, filename: String, path: String = "content/blog", completion: @escaping (Result<Void, Error>) -> Void) {
         let endpoint = "https://api.github.com/repos/\(owner)/\(repo)/contents/\(path)/\(filename)"
         
         guard let url = URL(string: endpoint),
