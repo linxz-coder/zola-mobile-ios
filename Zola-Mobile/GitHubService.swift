@@ -11,7 +11,7 @@ class GitHubService {
     private let token: String
     
     init() {
-        // 从配置中读取 token
+        // 从配置文件中读取 token
         guard let token = Bundle.main.object(forInfoDictionaryKey: "GITHUB_API_TOKEN") as? String else {
             fatalError("GitHub token not found in configuration")
         }
