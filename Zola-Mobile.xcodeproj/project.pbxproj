@@ -14,6 +14,9 @@
 		8D796F7C2CECDC9500423840 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8D796F7B2CECDC9500423840 /* Assets.xcassets */; };
 		8D796F7F2CECDC9500423840 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 8D796F7E2CECDC9500423840 /* Base */; };
 		8D796F872CECDD7600423840 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D796F862CECDD7600423840 /* GitHubService.swift */; };
+		8F4AA89F2CEDB78400D1C41B /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8F4AA89E2CEDB78400D1C41B /* Config.xcconfig */; };
+		8F4AA8A12CEDB80900D1C41B /* Config.xcconfig.example in Resources */ = {isa = PBXBuildFile; fileRef = 8F4AA8A02CEDB7F900D1C41B /* Config.xcconfig.example */; };
+		8F4AA8A32CEDB88500D1C41B /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 8F4AA8A22CEDB87C00D1C41B /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +29,9 @@
 		8D796F7E2CECDC9500423840 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8D796F802CECDC9500423840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D796F862CECDD7600423840 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
+		8F4AA89E2CEDB78400D1C41B /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		8F4AA8A02CEDB7F900D1C41B /* Config.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Config.xcconfig.example; sourceTree = "<group>"; };
+		8F4AA8A22CEDB87C00D1C41B /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,11 +67,14 @@
 				8D796F722CECDC9300423840 /* AppDelegate.swift */,
 				8D796F742CECDC9300423840 /* SceneDelegate.swift */,
 				8D796F862CECDD7600423840 /* GitHubService.swift */,
+				8F4AA89E2CEDB78400D1C41B /* Config.xcconfig */,
+				8F4AA8A02CEDB7F900D1C41B /* Config.xcconfig.example */,
 				8D796F762CECDC9300423840 /* ViewController.swift */,
 				8D796F782CECDC9300423840 /* Main.storyboard */,
 				8D796F7B2CECDC9500423840 /* Assets.xcassets */,
 				8D796F7D2CECDC9500423840 /* LaunchScreen.storyboard */,
 				8D796F802CECDC9500423840 /* Info.plist */,
+				8F4AA8A22CEDB87C00D1C41B /* .gitignore */,
 			);
 			path = "Zola-Mobile";
 			sourceTree = "<group>";
@@ -128,9 +137,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F4AA89F2CEDB78400D1C41B /* Config.xcconfig in Resources */,
 				8D796F7C2CECDC9500423840 /* Assets.xcassets in Resources */,
 				8D796F7F2CECDC9500423840 /* Base in Resources */,
 				8D796F7A2CECDC9300423840 /* Base in Resources */,
+				8F4AA8A32CEDB88500D1C41B /* .gitignore in Resources */,
+				8F4AA8A12CEDB80900D1C41B /* Config.xcconfig.example in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,6 +303,7 @@
 		};
 		8D796F842CECDC9500423840 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8F4AA89E2CEDB78400D1C41B /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

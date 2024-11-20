@@ -1,8 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -11,15 +14,51 @@
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="aiw-ja-TCA">
+                                <rect key="frame" x="0.0" y="59" width="393" height="793"/>
+                                <color key="backgroundColor" systemColor="labelColor"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="zola-mobile-logo-removebg-preview" translatesAutoresizingMaskIntoConstraints="NO" id="yIb-tU-GRP">
+                                <rect key="frame" x="96.666666666666686" y="326" width="200" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="1PG-fN-XCu"/>
+                                    <constraint firstAttribute="width" constant="200" id="IyK-BV-IOI"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="aiw-ja-TCA" secondAttribute="trailing" id="0M7-Wo-NNt"/>
+                            <constraint firstItem="yIb-tU-GRP" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="FPc-Mf-4ar"/>
+                            <constraint firstItem="yIb-tU-GRP" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="GW7-Pq-pzA"/>
+                            <constraint firstAttribute="bottom" secondItem="aiw-ja-TCA" secondAttribute="bottom" id="ToU-bp-gAf"/>
+                            <constraint firstItem="aiw-ja-TCA" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Wp8-oC-V0B"/>
+                            <constraint firstItem="aiw-ja-TCA" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="XUO-Us-lJd"/>
+                            <constraint firstItem="aiw-ja-TCA" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="bSI-lH-0jn"/>
+                            <constraint firstAttribute="trailing" secondItem="aiw-ja-TCA" secondAttribute="trailing" id="eKE-GH-hVp"/>
+                            <constraint firstItem="aiw-ja-TCA" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="g8v-SI-Lu2"/>
+                            <constraint firstItem="yIb-tU-GRP" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="jc1-oW-F1a"/>
+                            <constraint firstItem="aiw-ja-TCA" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="lpf-tj-dfw"/>
+                            <constraint firstItem="yIb-tU-GRP" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="uBe-TY-F1W"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="52.671755725190835" y="374.64788732394368"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="zola-mobile-logo-removebg-preview" width="500" height="500"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
 </document>

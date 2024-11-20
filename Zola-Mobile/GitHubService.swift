@@ -8,7 +8,15 @@ class GitHubService {
     private let repo = "zola-basic"
     private let branch = "main"
     private let path = "content/blog"
-    private let token = "YOUR_GITHUB_TOKEN"
+    private let token: String
+    
+    init() {
+        // 从配置中读取 token
+        guard let token = Bundle.main.object(forInfoDictionaryKey: "GITHUB_API_TOKEN") as? String else {
+            fatalError("GitHub token not found in configuration")
+        }
+        self.token = token
+    }
     
     func uploadContent(content: String, filename: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let endpoint = "https://api.github.com/repos/\(owner)/\(repo)/contents/\(path)/\(filename)"
