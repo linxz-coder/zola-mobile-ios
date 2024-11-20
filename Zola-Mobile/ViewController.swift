@@ -1,6 +1,10 @@
 import UIKit
 
 class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate {
+    // 添加一个属性来跟踪 title 的状态
+    private var hasFrontMatterTitle = false
+    
+    //标题栏：可自定义文件名
     private let filenameTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Enter filename (without .md)"
@@ -9,6 +13,7 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         return tf
     }()
     
+    //文本框区域
     private let textView: UITextView = {
         let tv = UITextView()
         tv.font = .systemFont(ofSize: 16)
@@ -16,6 +21,7 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         return tv
     }()
     
+    //上传按钮
     private let uploadButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Upload to GitHub", for: .normal)
@@ -24,29 +30,66 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         return button
     }()
     
+    // 键盘上方的确认按钮视图
+    private lazy var keyboardToolbar: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 44))
+        view.backgroundColor = .systemGray6
+        
+        let doneButton = UIButton(type: .custom)
+        doneButton.setTitle("Done", for: .normal)
+        doneButton.setTitleColor(.white, for: .normal)
+        doneButton.backgroundColor = .systemBlue
+        doneButton.layer.cornerRadius = 6
+        doneButton.translatesAutoresizingMaskIntoConstraints = false
+        doneButton.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
+        
+        view.addSubview(doneButton)
+        
+        NSLayoutConstraint.activate([
+            doneButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            doneButton.widthAnchor.constraint(equalToConstant: 60),
+            doneButton.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        
+        return view
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         insertFrontMatter()
         setupKeyboardHandling()
+        setupInputAccessoryViews()
         
-        // Add double tap gesture
+        // 双击空白退出编辑：Add double tap gesture
         let doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
         doubleTapGesture.numberOfTapsRequired = 2
         view.addGestureRecognizer(doubleTapGesture)
         
         filenameTextField.delegate = self
         textView.delegate = self
-        
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-        longPress.minimumPressDuration = 1.0
-        textView.addGestureRecognizer(longPress)
     }
     
+    // 设置输入框的inputAccessoryView
+    private func setupInputAccessoryViews() {
+        // 创建一个新的实例用于textView和filenameTextField
+        let accessoryView = keyboardToolbar
+        textView.inputAccessoryView = accessoryView
+        filenameTextField.inputAccessoryView = accessoryView
+    }
+    
+    // 确认按钮点击事件
+    @objc private func doneButtonTapped() {
+        view.endEditing(true)
+    }
+    
+    //双击退出编辑
     @objc private func handleDoubleTap() {
         view.endEditing(true)
     }
     
+    //设定初始UI的渲染
     private func setupUI() {
         view.backgroundColor = .white
         
@@ -73,6 +116,7 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         uploadButton.addTarget(self, action: #selector(uploadButtonTapped), for: .touchUpInside)
     }
     
+    //设定键盘自动出现和隐藏，不要挡住UI
     private func setupKeyboardHandling() {
         NotificationCenter.default.addObserver(self,
             selector: #selector(keyboardWillShow),
@@ -84,6 +128,7 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
             object: nil)
     }
     
+    //设置FrontMatter
     private func insertFrontMatter() {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -96,14 +141,11 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         +++
         
         """
+        
+        hasFrontMatterTitle = false  // 初始状态设置为 false
     }
     
-    @objc private func handleLongPress(gesture: UILongPressGestureRecognizer) {
-        if gesture.state == .began {
-            textView.resignFirstResponder()
-        }
-    }
-    
+    //键盘自动出现
     @objc private func keyboardWillShow(notification: NSNotification) {
         guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
             as? NSValue)?.cgRectValue else { return }
@@ -113,11 +155,13 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         textView.scrollIndicatorInsets = contentInsets
     }
     
+    //键盘自动隐藏
     @objc private func keyboardWillHide(notification: NSNotification) {
         textView.contentInset = .zero
         textView.scrollIndicatorInsets = .zero
     }
     
+    //上传按钮事件
     @objc private func uploadButtonTapped() {
         guard let filename = filenameTextField.text, !filename.isEmpty else { return }
         let content = textView.text!
@@ -133,15 +177,24 @@ class ViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate 
         }
     }
     
+    //upload button的通知事件
     private func showAlert(message: String) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
     
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let updatedText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? string
-        uploadButton.isEnabled = !updatedText.isEmpty
-        return true
+    //当文件名有内容的时候，才开启上传按钮
+    func textViewDidChange(_ textView: UITextView) {
+        // 检查是否包含 title = ""
+        if let text = textView.text {
+            hasFrontMatterTitle = !text.contains("title = \"\"")
+            updateUploadButtonState(hasFilename: !filenameTextField.text!.isEmpty)
+        }
+    }
+    
+    // 添加新方法来更新按钮状态
+    private func updateUploadButtonState(hasFilename: Bool) {
+        uploadButton.isEnabled = hasFilename && hasFrontMatterTitle
     }
 }
