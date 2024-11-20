@@ -3,3 +3,5 @@ Config.xcconfig
 
 # 但保留示例文件
 !Config.xcconfig.example
+
+Zola-Mobile/Config.xcconfig
